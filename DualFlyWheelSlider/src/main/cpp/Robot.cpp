@@ -6,15 +6,18 @@
 /*----------------------------------------------------------------------------*/
 
 #include "Robot.h"
-
+#include <ctre/Phoenix.h>
 #include <iostream>
 #include <rev/CANSparkMax.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/shuffleboard/Shuffleboard.h>
-std::shared_ptr<rev::CANSparkMax> Neo7;
+std::shared_ptr<WPI_TalonSRX> Neo7;
+std::shared_ptr<WPI_TalonSRX> Neo8;
 nt::NetworkTableEntry NumberValue;
+nt::NetworkTableEntry NumberValue2;
 
-int MotorValue;
+double MotorValue;
+double MotorValue2;
 std::shared_ptr<nt::Value> value;
 void Robot::RobotInit() {
  
@@ -25,9 +28,10 @@ void Robot::RobotInit() {
 //frc::SmartDashboard::GetNumber("NumberSlider", NumberValue); 
   //std::cout << NumberValue << std::endl;
 //frc::SmartDashboard::PutNumber("NumberSlider", 0);
-Neo7.reset(new rev::CANSparkMax(7, rev::CANSparkMaxLowLevel::MotorType::kBrushless));
-NumberValue =  frc::Shuffleboard::GetTab("Driver").Add("Speed",1).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
-
+Neo7.reset(new WPI_TalonSRX(7));
+Neo8.reset(new WPI_TalonSRX(8));
+NumberValue =  frc::Shuffleboard::GetTab("Driver").Add("Motor1",0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
+NumberValue2 =  frc::Shuffleboard::GetTab("Driver").Add("Motor2",0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
 
 }
 
@@ -49,7 +53,8 @@ void Robot::RobotPeriodic() {
  
  //frc::SmartDashboard::GetName("NumberSlider");
 // frc::SmartDashboard::GetNumber("NumberSlider", NumberValue);
-std::cout << NumberValue.GetDouble(1.0)<< std::endl; 
+std::cout << NumberValue.GetDouble(0)<< "Talon1" << std::endl; 
+std::cout << NumberValue2.GetDouble(0)<< "Talon2" << std::endl; 
 //frc::SimpleWidget::GetEntry();
  //NumberValue = frc::SmartDashboard::GetNumber("Speed", NumberValue);
 }
@@ -90,7 +95,12 @@ void Robot::AutonomousPeriodic() {
 void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
-  Neo7->Set(NumberValue.GetDouble(1.0));
+  MotorValue = NumberValue.GetDouble(1.0);
+  MotorValue = MotorValue  * -1;
+  MotorValue2 = NumberValue2.GetDouble(1.0);
+  MotorValue2 = MotorValue2  * -1;
+  Neo7->Set(MotorValue);
+  Neo8->Set(MotorValue2);
 }
 
 void Robot::TestPeriodic() {}
