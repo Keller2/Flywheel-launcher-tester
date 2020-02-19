@@ -13,10 +13,10 @@
 #include <frc/smartdashboard/SendableChooser.h>
 #include <rev/CANSparkMax.h>
 #include <frc/shuffleboard/Shuffleboard.h>
-
-
-class Robot : public frc::TimedRobot {
- public:
+#include <ctre/Phoenix.h>
+class Robot : public frc::TimedRobot
+{
+public:
   void RobotInit() override;
   void RobotPeriodic() override;
   void AutonomousInit() override;
@@ -25,11 +25,12 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
- private:
+private:
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
   const std::string kNumbersSlider;
   //const std::string NumberValue;
   std::string m_autoSelected;
+  CANCoder *_CANCoder;
 };
