@@ -12,19 +12,25 @@
 #include <rev/CANEncoder.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/shuffleboard/Shuffleboard.h>
-//std::shared_ptr<WPI_TalonSRX> Neo1;
-//std::shared_ptr<WPI_TalonSRX> Neo2;
-std::shared_ptr<WPI_TalonSRX> Neo3;
-//std::shared_ptr<rev::CANSparkMax> Neo1;
-//std::shared_ptr<rev::CANSparkMax> Neo2;
-std::shared_ptr<WPI_TalonFX> Neo1;
-std::shared_ptr<WPI_TalonFX> Neo2;
+/*WPI Talon Fx sets the motor as a falcon 500
+  CanSparkMax sets the motor type as a Rev Neo
+  TalonSRX sets the motor as a talon
+  *note that this does not set the motors ports*
+
+ */
+//std::shared_ptr<WPI_TalonSRX> Motor1;
+//std::shared_ptr<WPI_TalonSRX> Motor2;
+std::shared_ptr<WPI_TalonSRX> Motor3;
+//std::shared_ptr<rev::CANSparkMax> Motor1;
+//std::shared_ptr<rev::CANSparkMax> Motor2;
+std::shared_ptr<WPI_TalonFX> Motor1;
+std::shared_ptr<WPI_TalonFX> Motor2;
 nt::NetworkTableEntry NumberValue;
 double velValue;
 nt::NetworkTableEntry NumberValue2;
 nt::NetworkTableEntry NumberValue3;
 nt::NetworkTableEntry Velocity;
-double MotorValue;
+double MotorValue; //sets up a entry for a table output called motor value.
 double MotorValue2;
 double MotorValue3;
 double RPM;
@@ -38,17 +44,17 @@ void Robot::RobotInit()
   //frc::SmartDashboard::GetNumber("NumberSlider", NumberValue);
   //std::cout << NumberValue << std::endl;
   //frc::SmartDashboard::PutNumber("NumberSlider", 0);
-  //Neo1.reset(new WPI_TalonSRX(7));
-  //Neo2.reset(new WPI_TalonSRX(8));
-  Neo3.reset(new WPI_TalonSRX(3));
+  //Motor1.reset(new WPI_TalonSRX(7));
+  //Motor2.reset(new WPI_TalonSRX(8));
+  Motor3.reset(new WPI_TalonSRX(3));
   //_CANCoder = new CANCoder(5);
-  //Neo2.reset(new rev::CANSparkMax(1, rev::CANSparkMaxLowLevel::MotorType::kBrushed));
-  //Neo1.reset(new rev::CANSparkMax(2, rev::CANSparkMaxLowLevel::MotorType::kBrushed));
-  NumberValue = frc::Shuffleboard::GetTab("Driver").Add("Motor1", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
-  NumberValue2 = frc::Shuffleboard::GetTab("Driver").Add("Motor2", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
-  NumberValue3 = frc::Shuffleboard::GetTab("Driver").Add("Motor3", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
-  Neo1.reset(new WPI_TalonFX(5));
-  Neo2.reset(new WPI_TalonFX(6));
+  //Motor2.reset(new rev::CANSparkMax(1, rev::CANSparkMaxLowLevel::MotorType::kBrushed));
+  //Motor1.reset(new rev::CANSparkMax(2, rev::CANSparkMaxLowLevel::MotorType::kBrushed));
+  NumberValue = frc::Shuffleboard::GetTab("Driver").Add("Motor-1", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
+  NumberValue2 = frc::Shuffleboard::GetTab("Driver").Add("Motor-2", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
+  NumberValue3 = frc::Shuffleboard::GetTab("Driver").Add("Motor-3", 0).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
+  Motor1.reset(new WPI_TalonFX(5));
+  Motor2.reset(new WPI_TalonFX(6));
   // double velValue = _CANCoder->GetVelocity();
 }
 
@@ -63,19 +69,19 @@ void Robot::RobotInit()
 void Robot::RobotPeriodic()
 {
   // frc::SmartDashboard::PutNumber("Value", 67);
-  // double Velocity = Neo1->GetEncoder().GetVelocity();
+  // double Velocity = Motor1->GetEncoder().GetVelocity();
   //frc::Shuffleboard::GetTab("Numbers");
   // frc::Shuffleboard::GetTab("Driver").Add("Speed",1).WithWidget(frc::BuiltInWidgets::kNumberSlider).GetEntry();
   //frc::Shuffleboard::SelectTab("Speed");
   //frc::SmartDashboard::GetNumber("Speed", NumberValue);
   //velValue = _CANCoder->GetVelocity();
   //int rpms = velValue;
-  Neo1->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0);
+  Motor1->ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0);
   //frc::SmartDashboard::GetName("NumberSlider");
   // frc::SmartDashboard::GetNumber("NumberSlider", NumberValue);
   int kTimeoutMs = 30;
-  Neo1->ConfigSetParameter((ParamEnum)430, 2, 0, 0, kTimeoutMs);
-  double magVel_UnitsPer100ms = Neo1->GetSelectedSensorVelocity(0);
+  Motor1->ConfigSetParameter((ParamEnum)430, 2, 0, 0, kTimeoutMs);
+  double magVel_UnitsPer100ms = Motor1->GetSelectedSensorVelocity(0);
   double magRPM = magVel_UnitsPer100ms * 600 / 4096;
   std::cout << NumberValue.GetDouble(0) << "Talon1" << std::endl;
   //std::cout << NumberValue2.GetDouble(0) << "Talon2" << std::endl;
@@ -129,7 +135,9 @@ void Robot::AutonomousPeriodic()
   // std::cout << MotorValue << std::endl;
 }
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit()
+{
+}
 
 void Robot::TeleopPeriodic()
 {
@@ -138,9 +146,10 @@ void Robot::TeleopPeriodic()
   MotorValue2 = NumberValue2.GetDouble(1.0);
   MotorValue2 = MotorValue2 * -1;
   MotorValue3 = NumberValue3.GetDouble(1.0);
-  Neo1->Set(MotorValue);
-  Neo2->Set(MotorValue);
-  Neo3->Set(MotorValue3);
+  Motor1->Set(MotorValue);
+  Motor2->Set(MotorValue);
+  //Motor2->Set(MotorValue2);
+  Motor3->Set(MotorValue3);
 }
 
 void Robot::TestPeriodic() {}
